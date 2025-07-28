@@ -86,26 +86,3 @@ def fill_tables(conn, filename=data_file_path) -> None:
 
     conn.commit()
 
-if __name__ == "__main__":
-    conn = None
-    try:
-        # Подключение к БД
-        conn = psycopg2.connect(database=DB_NAME, user=DB_USER, password=DB_PASSWORD, host=DB_HOST)
-        print("Подключение к базе данных установлено")
-
-        # Создание таблиц
-        create_tables(conn)
-        print("Таблицы созданы")
-
-        # Заполнение таблиц данными
-        fill_tables(conn)
-        print("Таблицы заполнены данными из vacancy.json")
-
-    except psycopg2.Error as e:
-        print(f"Ошибка при работе с PostgreSQL: {e}")
-
-    finally:
-        # Закрытие соединения
-        if conn is not None:
-            conn.close()
-            print("Соединение с базой данных закрыто")

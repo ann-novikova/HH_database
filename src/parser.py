@@ -129,10 +129,4 @@ class HHEmployers(Parser):
 
 
 
-if __name__ == "__main__":
-    hh_api = HHEmployers()
-    hh_employers = hh_api.load_employers()
-    pprint(hh_employers)
-    hh_api_vacancies = HeadHunterAPI()
-    hh_vacancies = hh_api_vacancies.load_vacancies(hh_employers)
 
