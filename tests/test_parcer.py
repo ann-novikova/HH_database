@@ -15,6 +15,7 @@ def test_get_api_employers(init_hh_employer: HHEmployers) -> None:
         hh_vacancies = init_hh_employer.load_employers()
         assert hh_vacancies == []
 
+
 def test_get_api_hh(init_hh: HeadHunterAPI) -> None:
     with patch("requests.get") as mock_requests:
         mock_requests.return_value.status_code = 200
@@ -26,4 +27,3 @@ def test_get_api_hh(init_hh: HeadHunterAPI) -> None:
         mock_requests.return_value.status_code = 400
         hh_vacancies = init_hh.load_vacancies([])
         assert hh_vacancies == []
-

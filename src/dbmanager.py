@@ -1,5 +1,7 @@
 from abc import ABC, abstractmethod
+
 import psycopg2
+
 
 class BaseManager(ABC):
     """Абстрактный метод для всех классов подключений к БД"""
@@ -22,12 +24,11 @@ class BaseManager(ABC):
 
     @abstractmethod
     def get_vacancies_with_higher_salary(self) -> list[tuple]:
-       pass
-
+        pass
 
     @abstractmethod
     def get_vacancies_with_keyword(self, keyword: str) -> list[tuple] | None:
-       pass
+        pass
 
     @abstractmethod
     def connection_close(self) -> None:
@@ -52,8 +53,8 @@ class DBManager(BaseManager):
         """Соединение с БД"""
         try:
             self.conn = psycopg2.connect(
-            dbname=self.dbname, user=self.user, password=self.password, host=self.host, port=self.port
-        )
+                dbname=self.dbname, user=self.user, password=self.password, host=self.host, port=self.port
+            )
 
         except Exception as err:
             raise ConnectionError(f"Ошибка подключения к БД -> {err}")
@@ -63,13 +64,9 @@ class DBManager(BaseManager):
 
         cursor = self.conn.cursor()
         cursor.execute(
-            """
-            SELECT 
-                company_name, COUNT(*) as count_vacancies 
-            FROM 
-                employers 
+            """SELECT company_name, COUNT(*) as count_vacancies FROM employers
             JOIN vacancies USING(employer_id)
-            GROUP BY company_name 
+            GROUP BY company_name
             ORDER BY count_vacancies DESC
             """
         )
@@ -81,11 +78,11 @@ class DBManager(BaseManager):
         cursor = self.conn.cursor()
         cursor.execute(
             """
-            SELECT 
-                company_name, vacancy_name, salary_from, salary_to, url 
-            FROM 
-                vacancies as vac
-            JOIN employers as emp USING(employer_id)
+            SELECT
+            company_name, vacancy_name, salary_from, salary_to, url
+            FROM
+            vacancies
+            JOIN employers USING(employer_id)
             """
         )
         return cursor.fetchall()
@@ -94,23 +91,14 @@ class DBManager(BaseManager):
         """получает среднюю зарплату по вакансиям."""
 
         cursor = self.conn.cursor()
-        cursor.execute(
-            """
-            SELECT 
-                AVG(salary_from)
-            FROM 
-                vacancies
-            """
-        )
+        cursor.execute("""SELECT AVG(salary_from) FROM vacancies""")
         return cursor.fetchall()
 
     def get_vacancies_with_higher_salary(self) -> list[tuple]:
         """получает список всех вакансий, у которых зарплата выше средней по всем вакансиям."""
         avg_salary = self.get_avg_salary()
         cursor = self.conn.cursor()
-        cursor.execute(
-            f"SELECT * FROM vacancies WHERE salary_from > {avg_salary[0][0]}"
-        )
+        cursor.execute(f"SELECT * FROM vacancies WHERE salary_from > {avg_salary[0][0]}")
         return cursor.fetchall()
 
     def get_vacancies_with_keyword(self, keyword: str) -> list[tuple] | None:
@@ -118,15 +106,11 @@ class DBManager(BaseManager):
 
         cursor = self.conn.cursor()
         cursor.execute(
-            f"""
-            SELECT 
-                * 
-            FROM 
-                vacancies
-            WHERE vacancy_name LIKE '%{keyword.lower()}%' OR
-            vacancy_name LIKE '%{keyword.title()}%' OR
-            vacancy_name LIKE '%{keyword.upper()}%'
-            """
+            f"""SELECT * FROM vacancies
+        WHERE vacancy_name LIKE '%{keyword.lower()}%' OR
+        vacancy_name LIKE '%{keyword.title()}%' OR
+        vacancy_name LIKE '%{keyword.upper()}%'
+"""
         )
         return cursor.fetchall()
 
@@ -134,5 +118,3 @@ class DBManager(BaseManager):
         """закрывает активное соединение с БД."""
 
         self.conn.close()
-
-

@@ -1,5 +1,4 @@
 from abc import ABC, abstractmethod
-from pprint import pprint
 
 import requests
 
@@ -13,7 +12,6 @@ class Parser(ABC):
         Абстрактный метод для подключения к API.
         """
         pass
-
 
 
 class HeadHunterAPI(Parser):
@@ -87,9 +85,14 @@ class HHEmployers(Parser):
         """
         self.__url = "https://api.hh.ru/employers"
         self.__headers = {"User-Agent": "HH-User-Agent"}
-        self.__params: dict = {"text": "", "page": 0, "per_page": 10, "order_by": "vacancies",
-                               "only_with_vacancies": True}
-        self.__employers = []
+        self.__params: dict = {
+            "text": "",
+            "page": 0,
+            "per_page": 10,
+            "order_by": "vacancies",
+            "only_with_vacancies": True,
+        }
+        self.__employers: list[dict] = []
 
     def _connect_to_api(self) -> bool:
         """
@@ -126,7 +129,3 @@ class HHEmployers(Parser):
         except requests.exceptions.RequestException as e:
             print(f"Error loading vacancies: {e}")
             return []
-
-
-
-

@@ -1,6 +1,7 @@
-import psycopg2
 import json
 from pathlib import Path
+
+from psycopg2.extensions import connection
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 data_file_path = BASE_DIR / "data" / "vacancy.json"
@@ -12,12 +13,12 @@ DB_PASSWORD = "12345"  # Замените на ваш пароль
 DB_HOST = "localhost"
 
 
-
-def create_tables(conn) -> None:
-    """"Функция для создания таблиц"""
+def create_tables(conn: connection) -> None:
+    """ "Функция для создания таблиц"""
 
     with conn.cursor() as cur:
-        cur.execute("""
+        cur.execute(
+            """
             CREATE TABLE IF NOT EXISTS employers (
                 employer_id SERIAL PRIMARY KEY,
                 company_name VARCHAR(255) NOT NULL
@@ -33,23 +34,24 @@ def create_tables(conn) -> None:
                 description TEXT,
                 requirements TEXT
             );
-        """)
+        """
+        )
     conn.commit()
 
 
-def fill_tables(conn, filename=data_file_path) -> None:
+def fill_tables(conn: connection, filename: Path = data_file_path) -> None:
     """Функция для заполнения таблиц данными"""
 
-    with open(filename, 'r', encoding='utf-8') as f:
+    with open(filename, "r", encoding="utf-8") as f:
         vacancies_data = json.load(f)
 
     with conn.cursor() as cur:
         cur.execute("TRUNCATE TABLE vacancies CASCADE")
         for vacancy in vacancies_data:
             company = vacancy["employer"]
-            company_name = company['name']
-            vacancy_id = int(vacancy['id'])
-            salary = vacancy.get("salary")  # Handle salary being None
+            company_name = company["name"]
+            vacancy_id = int(vacancy["id"])
+            salary = vacancy.get("salary")
             descr = vacancy["snippet"]
             salary_from = None
             salary_to = None
@@ -69,20 +71,24 @@ def fill_tables(conn, filename=data_file_path) -> None:
                 employer_id = employer[0]
 
             # Добавляем вакансию
-            cur.execute("""
-                INSERT INTO vacancies (vacancy_id, employer_id, vacancy_name, url, salary_from, salary_to, description, requirements)
+            cur.execute(
+                """
+                INSERT INTO vacancies (
+                vacancy_id, employer_id, vacancy_name, url, salary_from, salary_to, description, requirements
+                )
                 VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
                 ON CONFLICT (vacancy_id) DO NOTHING;  -- Игнорируем дубликаты
-            """, (
-                vacancy_id,
-                employer_id,
-                vacancy['name'],
-                vacancy['url'],
-                salary_from,
-                salary_to,
-                descr['responsibility'],
-                descr['requirement']
-            ))
+            """,
+                (
+                    vacancy_id,
+                    employer_id,
+                    vacancy["name"],
+                    vacancy["url"],
+                    salary_from,
+                    salary_to,
+                    descr["responsibility"],
+                    descr["requirement"],
+                ),
+            )
 
     conn.commit()
-

@@ -1,10 +1,11 @@
-from src.file_worker import JsonWorker
-import psycopg2
-from src.parser import HeadHunterAPI, HHEmployers
-from src.dbmanager import DBManager
 from pprint import pprint
 
-from src.database import data_file_path, create_tables, fill_tables
+import psycopg2
+
+from src.database import create_tables, fill_tables
+from src.dbmanager import DBManager
+from src.file_worker import JsonWorker
+from src.parser import HeadHunterAPI, HHEmployers
 
 # Параметры подключения к БД
 DB_NAME = "hh_vacancies"
@@ -32,9 +33,9 @@ if __name__ == "__main__":
             conn.close()
     dbworker = DBManager("hh_vacancies", "12345")
     dbworker.connect()
-    # pprint(dbworker.get_companies_and_vacancies_count())
+    pprint(dbworker.get_companies_and_vacancies_count())
     pprint(dbworker.get_all_vacancies())
-    # pprint(dbworker.get_avg_salary())
-    # pprint(dbworker.get_vacancies_with_higher_salary())
-    # pprint(dbworker.get_vacancies_with_keyword("официант"))
-    # dbworker.connection_close()
+    pprint(dbworker.get_avg_salary())
+    pprint(dbworker.get_vacancies_with_higher_salary())
+    pprint(dbworker.get_vacancies_with_keyword("официант"))
+    dbworker.connection_close()
